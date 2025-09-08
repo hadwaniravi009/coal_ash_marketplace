@@ -1,19 +1,53 @@
-import React, { useState, useEffect } from "react";
-import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import axios from "axios";
+import {
+  Building2,
+  Calendar,
+  DollarSign,
+  Download,
+  FileBarChart,
+  LogOut,
+  MapPin,
+  Package,
+  Plus,
+  Search,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import "./App.css";
+import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./components/ui/dialog";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
-import { Textarea } from "./components/ui/textarea";
-import { Badge } from "./components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./components/ui/dialog";
-import { useToast } from "./hooks/use-toast";
+import { Textarea } from "./components/ui/textarea";
 import { Toaster } from "./components/ui/toaster";
-import { Building2, Users, Package, FileBarChart, Download, LogOut, Plus, Search, TrendingUp, MapPin, Calendar, DollarSign } from "lucide-react";
+import { useToast } from "./hooks/use-toast";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -24,14 +58,14 @@ const AuthContext = React.createContext();
 const useAuth = () => {
   const context = React.useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,11 +79,11 @@ const AuthProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUser(response.data);
     } catch (error) {
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       setToken(null);
     } finally {
       setLoading(false);
@@ -58,14 +92,20 @@ const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post(`${API}/auth/login`, { email, password });
+      const response = await axios.post(`${API}/auth/login`, {
+        email,
+        password,
+      });
       const { access_token, user } = response.data;
-      localStorage.setItem('token', access_token);
+      localStorage.setItem("token", access_token);
       setToken(access_token);
       setUser(user);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response?.data?.detail || 'Login failed' };
+      return {
+        success: false,
+        error: error.response?.data?.detail || "Login failed",
+      };
     }
   };
 
@@ -74,12 +114,15 @@ const AuthProvider = ({ children }) => {
       await axios.post(`${API}/auth/register`, userData);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response?.data?.detail || 'Registration failed' };
+      return {
+        success: false,
+        error: error.response?.data?.detail || "Registration failed",
+      };
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     setToken(null);
     setUser(null);
   };
@@ -90,7 +133,7 @@ const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    loading
+    loading,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -106,27 +149,32 @@ const FloatingActionButton = ({ children, onClick, className = "" }) => (
   </button>
 );
 
-const NotificationBadge = ({ count, className = "" }) => (
+const NotificationBadge = ({ count, className = "" }) =>
   count > 0 && (
-    <div className={`absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse ${className}`}>
-      {count > 99 ? '99+' : count}
+    <div
+      className={`absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center animate-pulse ${className}`}
+    >
+      {count > 99 ? "99+" : count}
     </div>
-  )
-);
+  );
 
 const LoadingSpinner = ({ size = "md", className = "" }) => {
   const sizeClasses = {
     sm: "w-4 h-4",
-    md: "w-6 h-6", 
-    lg: "w-8 h-8"
+    md: "w-6 h-6",
+    lg: "w-8 h-8",
   };
-  
-  return (
-    <div className={`spinner ${sizeClasses[size]} ${className}`}></div>
-  );
+
+  return <div className={`spinner ${sizeClasses[size]} ${className}`}></div>;
 };
 
-const EmptyState = ({ icon: Icon, title, description, action, className = "" }) => (
+const EmptyState = ({
+  icon: Icon,
+  title,
+  description,
+  action,
+  className = "",
+}) => (
   <div className={`text-center py-12 ${className}`}>
     <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <Icon className="h-8 w-8 text-gray-400" />
@@ -144,28 +192,28 @@ const Header = () => {
   const handleDownloadProject = async () => {
     try {
       const response = await axios.get(`${API}/download/project`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        responseType: 'blob'
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        responseType: "blob",
       });
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', 'coal-ash-marketplace.zip');
+      link.setAttribute("download", "coal-ash-marketplace.zip");
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
-      
+
       toast({
         title: "Success",
-        description: "Project downloaded successfully!"
+        description: "Project downloaded successfully!",
       });
     } catch (error) {
       toast({
         title: "Error",
         description: error.response?.data?.detail || "Download failed",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -184,33 +232,45 @@ const Header = () => {
               <p className="text-xs text-gray-500">Coal Ash Marketplace</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             {user && (
               <>
                 <div className="hidden md:flex items-center space-x-3">
                   <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">{user.contact_person}</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {user.contact_person}
+                    </p>
                     <p className="text-xs text-gray-500">{user.company}</p>
                   </div>
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="capitalize px-3 py-1 font-medium border-2"
                     style={{
-                      borderColor: user.role === 'admin' ? '#ef4444' : 
-                                   user.role === 'supplier' ? '#10b981' : 
-                                   user.role === 'buyer' ? '#3b82f6' : '#6b7280',
-                      color: user.role === 'admin' ? '#ef4444' : 
-                             user.role === 'supplier' ? '#10b981' : 
-                             user.role === 'buyer' ? '#3b82f6' : '#6b7280'
+                      borderColor:
+                        user.role === "admin"
+                          ? "#ef4444"
+                          : user.role === "supplier"
+                          ? "#10b981"
+                          : user.role === "buyer"
+                          ? "#3b82f6"
+                          : "#6b7280",
+                      color:
+                        user.role === "admin"
+                          ? "#ef4444"
+                          : user.role === "supplier"
+                          ? "#10b981"
+                          : user.role === "buyer"
+                          ? "#3b82f6"
+                          : "#6b7280",
                     }}
                   >
                     {user.role}
                   </Badge>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
-                  {user.role === 'admin' && (
+                  {user.role === "admin" && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -244,15 +304,15 @@ const LoginPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    company: '',
-    contact_person: '',
-    phone: '',
-    role: '',
-    address: '',
-    city: '',
-    state: ''
+    email: "",
+    password: "",
+    company: "",
+    contact_person: "",
+    phone: "",
+    role: "",
+    address: "",
+    city: "",
+    state: "",
   });
   const { login, register } = useAuth();
   const { toast } = useToast();
@@ -260,7 +320,7 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       if (isLogin) {
         const result = await login(formData.email, formData.password);
@@ -268,13 +328,13 @@ const LoginPage = () => {
           toast({
             title: "Welcome back! 🎉",
             description: "Logged in successfully!",
-            className: "success-checkmark"
+            className: "success-checkmark",
           });
         } else {
           toast({
             title: "Login Failed",
             description: result.error,
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       } else {
@@ -283,15 +343,15 @@ const LoginPage = () => {
           toast({
             title: "Account Created! 🎉",
             description: "Registration successful! Please login.",
-            className: "success-checkmark"
+            className: "success-checkmark",
           });
           setIsLogin(true);
-          setFormData({...formData, password: ''});
+          setFormData({ ...formData, password: "" });
         } else {
           toast({
             title: "Registration Failed",
             description: result.error,
-            variant: "destructive"
+            variant: "destructive",
           });
         }
       }
@@ -307,7 +367,7 @@ const LoginPage = () => {
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400 to-blue-500 rounded-full opacity-20 animate-pulse"></div>
       </div>
-      
+
       <Card className="w-full max-w-md glass shadow-modern-lg fade-in relative z-10">
         <CardHeader className="text-center pb-6">
           <div className="flex justify-center mb-6">
@@ -322,10 +382,10 @@ const LoginPage = () => {
             AshLink Marketplace
           </CardTitle>
           <CardDescription className="text-base text-gray-600">
-            {isLogin ? '👋 Welcome back!' : '🚀 Join our marketplace'}
+            {isLogin ? "👋 Welcome back!" : "🚀 Join our marketplace"}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="form-group">
@@ -337,12 +397,14 @@ const LoginPage = () => {
                 type="email"
                 placeholder="your@email.com"
                 value={formData.email}
-                onChange={(e) => setFormData({...formData, email: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="form-input"
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <Label htmlFor="password" className="form-label">
                 🔒 Password
@@ -352,12 +414,14 @@ const LoginPage = () => {
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
-                onChange={(e) => setFormData({...formData, password: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="form-input"
                 required
               />
             </div>
-            
+
             {!isLogin && (
               <div className="space-y-5 fade-in">
                 <div className="form-group">
@@ -368,12 +432,14 @@ const LoginPage = () => {
                     id="company"
                     placeholder="Your Company Ltd."
                     value={formData.company}
-                    onChange={(e) => setFormData({...formData, company: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, company: e.target.value })
+                    }
                     className="form-input"
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <Label htmlFor="contact_person" className="form-label">
                     👤 Contact Person
@@ -382,12 +448,17 @@ const LoginPage = () => {
                     id="contact_person"
                     placeholder="John Doe"
                     value={formData.contact_person}
-                    onChange={(e) => setFormData({...formData, contact_person: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        contact_person: e.target.value,
+                      })
+                    }
                     className="form-input"
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <Label htmlFor="phone" className="form-label">
                     📱 Phone Number
@@ -396,17 +467,24 @@ const LoginPage = () => {
                     id="phone"
                     placeholder="+1 (555) 123-4567"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
                     className="form-input"
                     required
                   />
                 </div>
-                
+
                 <div className="form-group">
                   <Label htmlFor="role" className="form-label">
                     🎯 Your Role
                   </Label>
-                  <Select value={formData.role} onValueChange={(value) => setFormData({...formData, role: value})}>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, role: value })
+                    }
+                  >
                     <SelectTrigger className="form-input">
                       <SelectValue placeholder="Select your role" />
                     </SelectTrigger>
@@ -417,7 +495,7 @@ const LoginPage = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="form-group">
                   <Label htmlFor="address" className="form-label">
                     📍 Address
@@ -426,12 +504,14 @@ const LoginPage = () => {
                     id="address"
                     placeholder="123 Business St"
                     value={formData.address}
-                    onChange={(e) => setFormData({...formData, address: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address: e.target.value })
+                    }
                     className="form-input"
                     required
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-3">
                   <div className="form-group">
                     <Label htmlFor="city" className="form-label">
@@ -441,7 +521,9 @@ const LoginPage = () => {
                       id="city"
                       placeholder="Mumbai"
                       value={formData.city}
-                      onChange={(e) => setFormData({...formData, city: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, city: e.target.value })
+                      }
                       className="form-input"
                       required
                     />
@@ -454,7 +536,9 @@ const LoginPage = () => {
                       id="state"
                       placeholder="Maharashtra"
                       value={formData.state}
-                      onChange={(e) => setFormData({...formData, state: e.target.value})}
+                      onChange={(e) =>
+                        setFormData({ ...formData, state: e.target.value })
+                      }
                       className="form-input"
                       required
                     />
@@ -462,9 +546,9 @@ const LoginPage = () => {
                 </div>
               </div>
             )}
-            
-            <Button 
-              type="submit" 
+
+            <Button
+              type="submit"
               className="w-full btn-animate bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 text-base"
               disabled={isLoading}
             >
@@ -474,21 +558,21 @@ const LoginPage = () => {
                   <span>Please wait...</span>
                 </div>
               ) : (
-                <>
-                  {isLogin ? '🚀 Sign In' : '✨ Create Account'}
-                </>
+                <>{isLogin ? "🚀 Sign In" : "✨ Create Account"}</>
               )}
             </Button>
           </form>
         </CardContent>
-        
+
         <CardFooter className="text-center pt-4">
           <Button
             variant="link"
             onClick={() => setIsLogin(!isLogin)}
             className="w-full text-base hover:text-blue-600"
           >
-            {isLogin ? "New here? Create an account 🆕" : "Already have an account? Sign in 👈"}
+            {isLogin
+              ? "New here? Create an account 🆕"
+              : "Already have an account? Sign in 👈"}
           </Button>
         </CardFooter>
       </Card>
@@ -516,68 +600,83 @@ const Dashboard = () => {
   const fetchAnalytics = async () => {
     try {
       const response = await axios.get(`${API}/analytics/dashboard`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setAnalytics(response.data);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
+      console.error("Error fetching analytics:", error);
     }
   };
 
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${API}/products`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setProducts(response.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
     }
   };
 
   const fetchDemands = async () => {
     try {
       const response = await axios.get(`${API}/demands`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setDemands(response.data);
     } catch (error) {
-      console.error('Error fetching demands:', error);
+      console.error("Error fetching demands:", error);
     }
   };
 
   const fetchOrders = async () => {
     try {
       const response = await axios.get(`${API}/orders/my`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setOrders(response.data);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
     }
   };
 
   const fetchSuggestions = async () => {
     try {
       const response = await axios.get(`${API}/matching/suggestions`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setSuggestions(response.data.suggestions);
     } catch (error) {
-      console.error('Error fetching suggestions:', error);
+      console.error("Error fetching suggestions:", error);
     }
   };
 
-  const StatCard = ({ title, value, icon: Icon, description, trend, trendValue }) => (
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
+    description,
+    trend,
+    trendValue,
+  }) => (
     <Card className="stats-card card-hover">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-gray-600">
+          {title}
+        </CardTitle>
         <div className="relative">
           <Icon className="h-5 w-5 text-gray-400" />
           {trend && (
-            <div className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
-              trend === 'up' ? 'bg-green-500' : trend === 'down' ? 'bg-red-500' : 'bg-yellow-500'
-            }`}></div>
+            <div
+              className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
+                trend === "up"
+                  ? "bg-green-500"
+                  : trend === "down"
+                  ? "bg-red-500"
+                  : "bg-yellow-500"
+              }`}
+            ></div>
           )}
         </div>
       </CardHeader>
@@ -586,10 +685,20 @@ const Dashboard = () => {
         <div className="flex items-center justify-between">
           <p className="stats-label">{description}</p>
           {trendValue && (
-            <div className={`flex items-center text-xs font-medium ${
-              trend === 'up' ? 'text-green-600' : trend === 'down' ? 'text-red-600' : 'text-yellow-600'
-            }`}>
-              <TrendingUp className={`h-3 w-3 mr-1 ${trend === 'down' ? 'rotate-180' : ''}`} />
+            <div
+              className={`flex items-center text-xs font-medium ${
+                trend === "up"
+                  ? "text-green-600"
+                  : trend === "down"
+                  ? "text-red-600"
+                  : "text-yellow-600"
+              }`}
+            >
+              <TrendingUp
+                className={`h-3 w-3 mr-1 ${
+                  trend === "down" ? "rotate-180" : ""
+                }`}
+              />
               {trendValue}
             </div>
           )}
@@ -613,7 +722,9 @@ const Dashboard = () => {
           <div className="hidden md:flex items-center space-x-4">
             <div className="text-right">
               <p className="text-sm text-gray-500">Last updated</p>
-              <p className="text-sm font-medium">{new Date().toLocaleTimeString()}</p>
+              <p className="text-sm font-medium">
+                {new Date().toLocaleTimeString()}
+              </p>
             </div>
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
@@ -623,7 +734,7 @@ const Dashboard = () => {
       {/* Analytics Cards */}
       {analytics && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {user?.role === 'admin' && (
+          {user?.role === "admin" && (
             <>
               <StatCard
                 title="Total Users"
@@ -659,8 +770,8 @@ const Dashboard = () => {
               />
             </>
           )}
-          
-          {user?.role === 'supplier' && (
+
+          {user?.role === "supplier" && (
             <>
               <StatCard
                 title="My Products"
@@ -696,8 +807,8 @@ const Dashboard = () => {
               />
             </>
           )}
-          
-          {user?.role === 'buyer' && (
+
+          {user?.role === "buyer" && (
             <>
               <StatCard
                 title="My Demands"
@@ -740,8 +851,8 @@ const Dashboard = () => {
       <Tabs defaultValue="marketplace" className="space-y-6">
         <div className="glass rounded-lg p-2 shadow-modern">
           <TabsList className="grid w-full grid-cols-4 bg-transparent gap-2">
-            <TabsTrigger 
-              value="marketplace" 
+            <TabsTrigger
+              value="marketplace"
               className="data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
             >
               <div className="flex items-center space-x-2">
@@ -749,7 +860,7 @@ const Dashboard = () => {
                 <span>Marketplace</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="my-items"
               className="data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
             >
@@ -758,7 +869,7 @@ const Dashboard = () => {
                 <span>My Items</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="orders"
               className="data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
             >
@@ -767,7 +878,7 @@ const Dashboard = () => {
                 <span>Orders</span>
               </div>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="matching"
               className="data-[state=active]:bg-white data-[state=active]:shadow-md transition-all duration-200 font-medium"
             >
@@ -782,15 +893,19 @@ const Dashboard = () => {
         <TabsContent value="marketplace" className="space-y-6">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
             <div>
-              <h3 className="text-2xl font-semibold text-gray-900">🏪 Marketplace</h3>
-              <p className="text-gray-600">Discover coal ash products from verified suppliers</p>
+              <h3 className="text-2xl font-semibold text-gray-900">
+                🏪 Marketplace
+              </h3>
+              <p className="text-gray-600">
+                Discover coal ash products from verified suppliers
+              </p>
             </div>
             <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full lg:w-auto">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input 
-                  placeholder="Search products, location..." 
-                  className="pl-10 w-full sm:w-64" 
+                <Input
+                  placeholder="Search products, location..."
+                  className="pl-10 w-full sm:w-64"
                 />
               </div>
               <Select>
@@ -806,7 +921,7 @@ const Dashboard = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product, index) => (
               <Card key={product.id} className="product-card">
@@ -815,11 +930,11 @@ const Dashboard = () => {
                     <Package className="h-16 w-16 text-white opacity-80" />
                   </div>
                   <div className="absolute top-4 left-4">
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="bg-white/90 text-gray-800 capitalize font-medium"
                     >
-                      {product.ash_type.replace('_', ' ')}
+                      {product.ash_type.replace("_", " ")}
                     </Badge>
                   </div>
                   <div className="absolute top-4 right-4">
@@ -832,30 +947,51 @@ const Dashboard = () => {
                   <div className="flex items-start justify-between mb-3">
                     <h4 className="product-title">{product.title}</h4>
                     <Button variant="ghost" size="sm" className="p-1">
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                        />
                       </svg>
                     </Button>
                   </div>
-                  
+
                   <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">📦 Quantity:</span>
-                      <span className="font-semibold text-gray-900">{product.quantity_available} tons</span>
+                      <span className="text-sm text-gray-600">
+                        📦 Quantity:
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {product.quantity_available} tons
+                      </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">💰 Price:</span>
-                      <span className="product-price">₹{product.price_per_ton}/ton</span>
+                      <span className="product-price">
+                        ₹{product.price_per_ton}/ton
+                      </span>
                     </div>
                     <div className="flex items-center text-sm text-gray-600">
                       <MapPin className="h-4 w-4 mr-1 text-blue-500" />
-                      <span>{product.city}, {product.state}</span>
+                      <span>
+                        {product.city}, {product.state}
+                      </span>
                     </div>
                   </div>
-                  
+
                   <div className="border-t pt-3">
-                    {user?.role === 'buyer' ? (
-                      <CreateOrderDialog product={product} onOrderCreated={fetchOrders} />
+                    {user?.role === "buyer" ? (
+                      <CreateOrderDialog
+                        product={product}
+                        onOrderCreated={fetchOrders}
+                      />
                     ) : (
                       <Button variant="outline" className="w-full" disabled>
                         View Details
@@ -866,25 +1002,35 @@ const Dashboard = () => {
               </Card>
             ))}
           </div>
-          
+
           {products.length === 0 && (
             <div className="text-center py-12">
               <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-              <p className="text-gray-600">Try adjusting your search criteria or check back later.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No products found
+              </h3>
+              <p className="text-gray-600">
+                Try adjusting your search criteria or check back later.
+              </p>
             </div>
           )}
         </TabsContent>
 
         <TabsContent value="my-items" className="space-y-6">
-          {user?.role === 'supplier' && <SupplierItems onItemsChanged={fetchProducts} />}
-          {user?.role === 'buyer' && <BuyerItems onItemsChanged={fetchDemands} />}
+          {user?.role === "supplier" && (
+            <SupplierItems onItemsChanged={fetchProducts} />
+          )}
+          {user?.role === "buyer" && (
+            <BuyerItems onItemsChanged={fetchDemands} />
+          )}
         </TabsContent>
 
         <TabsContent value="orders" className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="text-2xl font-semibold text-gray-900">📋 My Orders</h3>
+              <h3 className="text-2xl font-semibold text-gray-900">
+                📋 My Orders
+              </h3>
               <p className="text-gray-600">Track and manage your orders</p>
             </div>
             <div className="flex space-x-2">
@@ -902,7 +1048,7 @@ const Dashboard = () => {
               </Select>
             </div>
           </div>
-          
+
           <div className="space-y-4">
             {orders.map((order, index) => (
               <Card key={order.id} className="card-hover">
@@ -913,57 +1059,100 @@ const Dashboard = () => {
                         <FileBarChart className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900">Order #{order.id.slice(0, 8)}...</p>
+                        <p className="font-medium text-gray-900">
+                          Order #{order.id.slice(0, 8)}...
+                        </p>
                         <p className="text-sm text-gray-500">
                           {new Date(order.created_at).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <Badge 
+                    <Badge
                       className={`capitalize px-3 py-1 font-medium ${
-                        order.status === 'pending' ? 'status-pending' :
-                        order.status === 'confirmed' ? 'status-confirmed' :
-                        order.status === 'in_transit' ? 'status-in-transit' :
-                        order.status === 'delivered' ? 'status-delivered' :
-                        'status-cancelled'
+                        order.status === "pending"
+                          ? "status-pending"
+                          : order.status === "confirmed"
+                          ? "status-confirmed"
+                          : order.status === "in_transit"
+                          ? "status-in-transit"
+                          : order.status === "delivered"
+                          ? "status-delivered"
+                          : "status-cancelled"
                       }`}
                     >
-                      {order.status.replace('_', ' ')}
+                      {order.status.replace("_", " ")}
                     </Badge>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">📦 Quantity</p>
-                      <p className="font-semibold text-gray-900">{order.quantity} tons</p>
+                      <p className="font-semibold text-gray-900">
+                        {order.quantity} tons
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">💰 Total Amount</p>
-                      <p className="font-semibold text-blue-600">₹{order.total_amount.toLocaleString()}</p>
+                      <p className="font-semibold text-blue-600">
+                        ₹{order.total_amount.toLocaleString()}
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm text-gray-500">📍 Delivery</p>
-                      <p className="font-medium text-gray-900">{order.delivery_address.slice(0, 20)}...</p>
+                      <p className="font-medium text-gray-900">
+                        {order.delivery_address.slice(0, 20)}...
+                      </p>
                     </div>
                     <div className="flex justify-end items-center space-x-2">
                       <Button variant="outline" size="sm">
                         View Details
                       </Button>
-                      {order.status === 'pending' && (
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700">
+                      {order.status === "pending" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                        >
                           Cancel
                         </Button>
                       )}
                     </div>
                   </div>
-                  
+
                   {/* Order Progress */}
                   <div className="mt-4 pt-4 border-t">
                     <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${order.status !== 'cancelled' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <div className={`w-3 h-3 rounded-full ${order.status === 'confirmed' || order.status === 'in_transit' || order.status === 'delivered' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <div className={`w-3 h-3 rounded-full ${order.status === 'in_transit' || order.status === 'delivered' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <div className={`w-3 h-3 rounded-full ${order.status === 'delivered' ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          order.status !== "cancelled"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          order.status === "confirmed" ||
+                          order.status === "in_transit" ||
+                          order.status === "delivered"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          order.status === "in_transit" ||
+                          order.status === "delivered"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`w-3 h-3 rounded-full ${
+                          order.status === "delivered"
+                            ? "bg-green-500"
+                            : "bg-gray-300"
+                        }`}
+                      ></div>
                     </div>
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                       <span>Placed</span>
@@ -976,12 +1165,16 @@ const Dashboard = () => {
               </Card>
             ))}
           </div>
-          
+
           {orders.length === 0 && (
             <div className="text-center py-12">
               <FileBarChart className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-              <p className="text-gray-600 mb-4">Start by browsing the marketplace to place your first order.</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No orders yet
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Start by browsing the marketplace to place your first order.
+              </p>
               <Button>Browse Products</Button>
             </div>
           )}
@@ -989,13 +1182,20 @@ const Dashboard = () => {
 
         <TabsContent value="matching" className="space-y-6">
           <div className="mb-6">
-            <h3 className="text-2xl font-semibold text-gray-900">🎯 Smart Matching</h3>
-            <p className="text-gray-600">AI-powered suggestions to connect supply with demand</p>
+            <h3 className="text-2xl font-semibold text-gray-900">
+              🎯 Smart Matching
+            </h3>
+            <p className="text-gray-600">
+              AI-powered suggestions to connect supply with demand
+            </p>
           </div>
-          
+
           <div className="space-y-6">
             {suggestions.map((suggestion, index) => (
-              <Card key={index} className="border-l-4 border-l-blue-500 card-hover">
+              <Card
+                key={index}
+                className="border-l-4 border-l-blue-500 card-hover"
+              >
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center space-x-3">
@@ -1003,8 +1203,12 @@ const Dashboard = () => {
                         <span className="text-white font-bold text-lg">🎯</span>
                       </div>
                       <div>
-                        <h4 className="font-semibold text-lg text-gray-900">Perfect Match Found!</h4>
-                        <p className="text-sm text-gray-600">High compatibility score</p>
+                        <h4 className="font-semibold text-lg text-gray-900">
+                          Perfect Match Found!
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          High compatibility score
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -1013,7 +1217,7 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="bg-gray-50 rounded-lg p-4 mb-4">
                     {suggestion.demand && (
                       <div className="flex items-center space-x-3 mb-3">
@@ -1021,40 +1225,52 @@ const Dashboard = () => {
                           <TrendingUp className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">Your Demand Request</p>
+                          <p className="font-medium text-gray-900">
+                            Your Demand Request
+                          </p>
                           <p className="text-sm text-gray-600">
-                            {suggestion.demand.title} ({suggestion.demand.quantity_required} tons)
+                            {suggestion.demand.title} (
+                            {suggestion.demand.quantity_required} tons)
                           </p>
                         </div>
                       </div>
                     )}
-                    
+
                     {suggestion.product && (
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
                           <Package className="h-4 w-4 text-green-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">Your Product</p>
+                          <p className="font-medium text-gray-900">
+                            Your Product
+                          </p>
                           <p className="text-sm text-gray-600">
-                            {suggestion.product.title} ({suggestion.product.quantity_available} tons)
+                            {suggestion.product.title} (
+                            {suggestion.product.quantity_available} tons)
                           </p>
                         </div>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="text-sm font-medium text-green-600">
-                        ✨ {suggestion.matching_products?.length || suggestion.matching_demands?.length} matching opportunities
+                        ✨{" "}
+                        {suggestion.matching_products?.length ||
+                          suggestion.matching_demands?.length}{" "}
+                        matching opportunities
                       </span>
                     </div>
                     <div className="flex space-x-2">
                       <Button variant="outline" size="sm">
                         View Details
                       </Button>
-                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 text-white"
+                      >
                         Connect Now
                       </Button>
                     </div>
@@ -1063,21 +1279,22 @@ const Dashboard = () => {
               </Card>
             ))}
           </div>
-          
+
           {suggestions.length === 0 && (
             <div className="text-center py-12">
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-white text-2xl">🎯</span>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No matches found yet</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No matches found yet
+              </h3>
               <p className="text-gray-600 mb-4">
-                {user?.role === 'supplier' ? 
-                  'Add more products to get better matching opportunities with buyer demands.' :
-                  'Post more demand requests to get matched with available products.'
-                }
+                {user?.role === "supplier"
+                  ? "Add more products to get better matching opportunities with buyer demands."
+                  : "Post more demand requests to get matched with available products."}
               </p>
               <Button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-                {user?.role === 'supplier' ? 'Add Product' : 'Post Demand'}
+                {user?.role === "supplier" ? "Add Product" : "Post Demand"}
               </Button>
             </div>
           )}
@@ -1100,11 +1317,11 @@ const SupplierItems = ({ onItemsChanged }) => {
   const fetchMyProducts = async () => {
     try {
       const response = await axios.get(`${API}/products/my`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setMyProducts(response.data);
     } catch (error) {
-      console.error('Error fetching my products:', error);
+      console.error("Error fetching my products:", error);
     }
   };
 
@@ -1112,7 +1329,7 @@ const SupplierItems = ({ onItemsChanged }) => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-semibold">My Products</h3>
-        <CreateProductDialog 
+        <CreateProductDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onProductCreated={() => {
@@ -1121,7 +1338,7 @@ const SupplierItems = ({ onItemsChanged }) => {
           }}
         />
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {myProducts.map((product) => (
           <Card key={product.id}>
@@ -1129,7 +1346,7 @@ const SupplierItems = ({ onItemsChanged }) => {
               <CardTitle className="text-lg">{product.title}</CardTitle>
               <CardDescription>
                 <Badge variant="secondary" className="capitalize">
-                  {product.ash_type.replace('_', ' ')}
+                  {product.ash_type.replace("_", " ")}
                 </Badge>
               </CardDescription>
             </CardHeader>
@@ -1137,11 +1354,15 @@ const SupplierItems = ({ onItemsChanged }) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Available:</span>
-                  <span className="font-medium">{product.quantity_available} tons</span>
+                  <span className="font-medium">
+                    {product.quantity_available} tons
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Price:</span>
-                  <span className="font-medium">₹{product.price_per_ton}/ton</span>
+                  <span className="font-medium">
+                    ₹{product.price_per_ton}/ton
+                  </span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <MapPin className="h-4 w-4 mr-1" />
@@ -1167,11 +1388,11 @@ const BuyerItems = ({ onItemsChanged }) => {
   const fetchMyDemands = async () => {
     try {
       const response = await axios.get(`${API}/demands/my`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setMyDemands(response.data);
     } catch (error) {
-      console.error('Error fetching my demands:', error);
+      console.error("Error fetching my demands:", error);
     }
   };
 
@@ -1179,7 +1400,7 @@ const BuyerItems = ({ onItemsChanged }) => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-2xl font-semibold">My Demand Requests</h3>
-        <CreateDemandDialog 
+        <CreateDemandDialog
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onDemandCreated={() => {
@@ -1188,7 +1409,7 @@ const BuyerItems = ({ onItemsChanged }) => {
           }}
         />
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {myDemands.map((demand) => (
           <Card key={demand.id}>
@@ -1196,7 +1417,7 @@ const BuyerItems = ({ onItemsChanged }) => {
               <CardTitle className="text-lg">{demand.title}</CardTitle>
               <CardDescription>
                 <Badge variant="outline" className="capitalize">
-                  {demand.ash_type.replace('_', ' ')}
+                  {demand.ash_type.replace("_", " ")}
                 </Badge>
               </CardDescription>
             </CardHeader>
@@ -1204,11 +1425,15 @@ const BuyerItems = ({ onItemsChanged }) => {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Required:</span>
-                  <span className="font-medium">{demand.quantity_required} tons</span>
+                  <span className="font-medium">
+                    {demand.quantity_required} tons
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Max Price:</span>
-                  <span className="font-medium">₹{demand.max_price_per_ton}/ton</span>
+                  <span className="font-medium">
+                    ₹{demand.max_price_per_ton}/ton
+                  </span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <Calendar className="h-4 w-4 mr-1" />
@@ -1225,52 +1450,56 @@ const BuyerItems = ({ onItemsChanged }) => {
 
 const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    ash_type: '',
-    quantity_available: '',
-    price_per_ton: '',
-    location: '',
-    city: '',
-    state: '',
+    title: "",
+    ash_type: "",
+    quantity_available: "",
+    price_per_ton: "",
+    location: "",
+    city: "",
+    state: "",
     quality_specs: {},
-    description: ''
+    description: "",
   });
   const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/products`, {
-        ...formData,
-        quantity_available: parseInt(formData.quantity_available),
-        price_per_ton: parseFloat(formData.price_per_ton)
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
+      await axios.post(
+        `${API}/products`,
+        {
+          ...formData,
+          quantity_available: parseInt(formData.quantity_available),
+          price_per_ton: parseFloat(formData.price_per_ton),
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
       toast({
         title: "Success",
-        description: "Product created successfully!"
+        description: "Product created successfully!",
       });
-      
+
       onProductCreated();
       onOpenChange(false);
       setFormData({
-        title: '',
-        ash_type: '',
-        quantity_available: '',
-        price_per_ton: '',
-        location: '',
-        city: '',
-        state: '',
+        title: "",
+        ash_type: "",
+        quantity_available: "",
+        price_per_ton: "",
+        location: "",
+        city: "",
+        state: "",
         quality_specs: {},
-        description: ''
+        description: "",
       });
     } catch (error) {
       toast({
         title: "Error",
         description: error.response?.data?.detail || "Failed to create product",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -1290,7 +1519,7 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
             List your coal ash product for buyers to discover
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -1298,13 +1527,20 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
             <div>
               <Label htmlFor="ash_type">Ash Type</Label>
-              <Select value={formData.ash_type} onValueChange={(value) => setFormData({...formData, ash_type: value})}>
+              <Select
+                value={formData.ash_type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, ash_type: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select ash type" />
                 </SelectTrigger>
@@ -1316,7 +1552,7 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="quantity">Quantity (tons)</Label>
@@ -1324,7 +1560,12 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
                 id="quantity"
                 type="number"
                 value={formData.quantity_available}
-                onChange={(e) => setFormData({...formData, quantity_available: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    quantity_available: e.target.value,
+                  })
+                }
                 required
               />
             </div>
@@ -1335,19 +1576,23 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
                 type="number"
                 step="0.01"
                 value={formData.price_per_ton}
-                onChange={(e) => setFormData({...formData, price_per_ton: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, price_per_ton: e.target.value })
+                }
                 required
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="location">Location</Label>
               <Input
                 id="location"
                 value={formData.location}
-                onChange={(e) => setFormData({...formData, location: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, location: e.target.value })
+                }
                 required
               />
             </div>
@@ -1356,7 +1601,9 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
               <Input
                 id="city"
                 value={formData.city}
-                onChange={(e) => setFormData({...formData, city: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
                 required
               />
             </div>
@@ -1365,24 +1612,32 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
               <Input
                 id="state"
                 value={formData.state}
-                onChange={(e) => setFormData({...formData, state: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, state: e.target.value })
+                }
                 required
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               required
             />
           </div>
-          
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Create Product</Button>
@@ -1395,55 +1650,59 @@ const CreateProductDialog = ({ open, onOpenChange, onProductCreated }) => {
 
 const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    ash_type: '',
-    quantity_required: '',
-    max_price_per_ton: '',
-    delivery_location: '',
-    delivery_city: '',
-    delivery_state: '',
-    required_by: '',
+    title: "",
+    ash_type: "",
+    quantity_required: "",
+    max_price_per_ton: "",
+    delivery_location: "",
+    delivery_city: "",
+    delivery_state: "",
+    required_by: "",
     quality_requirements: {},
-    description: ''
+    description: "",
   });
   const { toast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API}/demands`, {
-        ...formData,
-        quantity_required: parseInt(formData.quantity_required),
-        max_price_per_ton: parseFloat(formData.max_price_per_ton),
-        required_by: new Date(formData.required_by).toISOString()
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
+      await axios.post(
+        `${API}/demands`,
+        {
+          ...formData,
+          quantity_required: parseInt(formData.quantity_required),
+          max_price_per_ton: parseFloat(formData.max_price_per_ton),
+          required_by: new Date(formData.required_by).toISOString(),
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
       toast({
         title: "Success",
-        description: "Demand request created successfully!"
+        description: "Demand request created successfully!",
       });
-      
+
       onDemandCreated();
       onOpenChange(false);
       setFormData({
-        title: '',
-        ash_type: '',
-        quantity_required: '',
-        max_price_per_ton: '',
-        delivery_location: '',
-        delivery_city: '',
-        delivery_state: '',
-        required_by: '',
+        title: "",
+        ash_type: "",
+        quantity_required: "",
+        max_price_per_ton: "",
+        delivery_location: "",
+        delivery_city: "",
+        delivery_state: "",
+        required_by: "",
         quality_requirements: {},
-        description: ''
+        description: "",
       });
     } catch (error) {
       toast({
         title: "Error",
         description: error.response?.data?.detail || "Failed to create demand",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -1463,7 +1722,7 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
             Post your coal ash requirements for suppliers to see
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -1471,13 +1730,20 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({...formData, title: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
             <div>
               <Label htmlFor="ash_type">Ash Type</Label>
-              <Select value={formData.ash_type} onValueChange={(value) => setFormData({...formData, ash_type: value})}>
+              <Select
+                value={formData.ash_type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, ash_type: value })
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select ash type" />
                 </SelectTrigger>
@@ -1489,7 +1755,7 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
               </Select>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="quantity">Quantity Required (tons)</Label>
@@ -1497,7 +1763,12 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
                 id="quantity"
                 type="number"
                 value={formData.quantity_required}
-                onChange={(e) => setFormData({...formData, quantity_required: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    quantity_required: e.target.value,
+                  })
+                }
                 required
               />
             </div>
@@ -1508,7 +1779,12 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
                 type="number"
                 step="0.01"
                 value={formData.max_price_per_ton}
-                onChange={(e) => setFormData({...formData, max_price_per_ton: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    max_price_per_ton: e.target.value,
+                  })
+                }
                 required
               />
             </div>
@@ -1518,19 +1794,26 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
                 id="required_by"
                 type="date"
                 value={formData.required_by}
-                onChange={(e) => setFormData({...formData, required_by: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, required_by: e.target.value })
+                }
                 required
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="delivery_location">Delivery Location</Label>
               <Input
                 id="delivery_location"
                 value={formData.delivery_location}
-                onChange={(e) => setFormData({...formData, delivery_location: e.target.value})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    delivery_location: e.target.value,
+                  })
+                }
                 required
               />
             </div>
@@ -1539,7 +1822,9 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
               <Input
                 id="delivery_city"
                 value={formData.delivery_city}
-                onChange={(e) => setFormData({...formData, delivery_city: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, delivery_city: e.target.value })
+                }
                 required
               />
             </div>
@@ -1548,24 +1833,32 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
               <Input
                 id="delivery_state"
                 value={formData.delivery_state}
-                onChange={(e) => setFormData({...formData, delivery_state: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, delivery_state: e.target.value })
+                }
                 required
               />
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               required
             />
           </div>
-          
+
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Create Demand</Button>
@@ -1578,9 +1871,9 @@ const CreateDemandDialog = ({ open, onOpenChange, onDemandCreated }) => {
 
 const CreateOrderDialog = ({ product, onOrderCreated }) => {
   const [formData, setFormData] = useState({
-    quantity: '',
-    delivery_address: '',
-    contract_terms: ''
+    quantity: "",
+    delivery_address: "",
+    contract_terms: "",
   });
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -1589,42 +1882,48 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await axios.post(`${API}/orders`, {
-        product_id: product.id,
-        quantity: parseInt(formData.quantity),
-        delivery_address: formData.delivery_address,
-        contract_terms: formData.contract_terms
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      
+      await axios.post(
+        `${API}/orders`,
+        {
+          product_id: product.id,
+          quantity: parseInt(formData.quantity),
+          delivery_address: formData.delivery_address,
+          contract_terms: formData.contract_terms,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      );
+
       toast({
         title: "Order Placed Successfully! 🎉",
         description: "Your order has been submitted to the supplier.",
-        className: "success-checkmark"
+        className: "success-checkmark",
       });
-      
+
       onOrderCreated();
       setIsOpen(false);
       setFormData({
-        quantity: '',
-        delivery_address: '',
-        contract_terms: ''
+        quantity: "",
+        delivery_address: "",
+        contract_terms: "",
       });
     } catch (error) {
       toast({
         title: "Order Failed",
         description: error.response?.data?.detail || "Failed to create order",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const totalAmount = formData.quantity ? formData.quantity * product.price_per_ton : 0;
+  const totalAmount = formData.quantity
+    ? formData.quantity * product.price_per_ton
+    : 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -1644,11 +1943,13 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
           <DialogDescription className="text-base">
             <div className="bg-gray-50 rounded-lg p-3 mt-3">
               <p className="font-medium text-gray-900">{product.title}</p>
-              <p className="text-sm text-gray-600">₹{product.price_per_ton}/ton</p>
+              <p className="text-sm text-gray-600">
+                ₹{product.price_per_ton}/ton
+              </p>
             </div>
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="form-group">
             <Label htmlFor="quantity" className="form-label">
@@ -1661,12 +1962,14 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
               max={product.quantity_available}
               placeholder="Enter quantity..."
               value={formData.quantity}
-              onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, quantity: e.target.value })
+              }
               className="form-input"
               required
             />
           </div>
-          
+
           <div className="form-group">
             <Label htmlFor="delivery_address" className="form-label">
               📍 Delivery Address
@@ -1675,12 +1978,14 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
               id="delivery_address"
               placeholder="Enter complete delivery address..."
               value={formData.delivery_address}
-              onChange={(e) => setFormData({...formData, delivery_address: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, delivery_address: e.target.value })
+              }
               className="form-input min-h-[80px]"
               required
             />
           </div>
-          
+
           <div className="form-group">
             <Label htmlFor="contract_terms" className="form-label">
               📋 Contract Terms (Optional)
@@ -1689,14 +1994,18 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
               id="contract_terms"
               placeholder="Any special terms or conditions..."
               value={formData.contract_terms}
-              onChange={(e) => setFormData({...formData, contract_terms: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, contract_terms: e.target.value })
+              }
               className="form-input min-h-[60px]"
             />
           </div>
-          
+
           {formData.quantity && (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-medium text-gray-900 mb-2">💰 Order Summary</h4>
+              <h4 className="font-medium text-gray-900 mb-2">
+                💰 Order Summary
+              </h4>
               <div className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Quantity:</span>
@@ -1704,29 +2013,35 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Price per ton:</span>
-                  <span className="font-medium">₹{product.price_per_ton.toLocaleString()}</span>
+                  <span className="font-medium">
+                    ₹{product.price_per_ton.toLocaleString()}
+                  </span>
                 </div>
                 <div className="border-t pt-2 mt-2">
                   <div className="flex justify-between">
-                    <span className="font-semibold text-gray-900">Total Amount:</span>
-                    <span className="font-bold text-blue-600 text-lg">₹{totalAmount.toLocaleString()}</span>
+                    <span className="font-semibold text-gray-900">
+                      Total Amount:
+                    </span>
+                    <span className="font-bold text-blue-600 text-lg">
+                      ₹{totalAmount.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="flex space-x-2">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setIsOpen(false)}
               className="flex-1"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
               className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
             >
@@ -1736,7 +2051,7 @@ const CreateOrderDialog = ({ product, onOrderCreated }) => {
                   <span>Placing...</span>
                 </div>
               ) : (
-                '🚀 Confirm Order'
+                "🚀 Confirm Order"
               )}
             </Button>
           </DialogFooter>
@@ -1773,8 +2088,12 @@ const AuthContent = () => {
           </div>
           <div className="space-y-3">
             <LoadingSpinner size="lg" className="mx-auto" />
-            <h3 className="text-xl font-semibold text-gray-900">Loading AshLink</h3>
-            <p className="text-gray-600">Preparing your marketplace experience...</p>
+            <h3 className="text-xl font-semibold text-gray-900">
+              Loading AshLink
+            </h3>
+            <p className="text-gray-600">
+              Preparing your marketplace experience...
+            </p>
           </div>
         </div>
       </div>
@@ -1809,38 +2128,75 @@ const Footer = () => (
             <h3 className="text-xl font-bold">AshLink</h3>
           </div>
           <p className="text-gray-400 text-sm">
-            Connecting the coal ash ecosystem for sustainable construction solutions.
+            Connecting the coal ash ecosystem for sustainable construction
+            solutions.
           </p>
         </div>
-        
+
         <div>
           <h4 className="font-semibold mb-4">Marketplace</h4>
           <ul className="space-y-2 text-sm text-gray-400">
-            <li><a href="#" className="hover:text-white transition-colors">Browse Products</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Post Demands</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Smart Matching</a></li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Browse Products
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Post Demands
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Smart Matching
+              </a>
+            </li>
           </ul>
         </div>
-        
+
         <div>
           <h4 className="font-semibold mb-4">Support</h4>
           <ul className="space-y-2 text-sm text-gray-400">
-            <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Documentation</a></li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Help Center
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Contact Us
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Documentation
+              </a>
+            </li>
           </ul>
         </div>
-        
+
         <div>
           <h4 className="font-semibold mb-4">Company</h4>
           <ul className="space-y-2 text-sm text-gray-400">
-            <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-            <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                About Us
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Privacy Policy
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-white transition-colors">
+                Terms of Service
+              </a>
+            </li>
           </ul>
         </div>
       </div>
-      
+
       <div className="border-t border-gray-800 mt-8 pt-6 text-center text-sm text-gray-400">
         <p>&copy; 2025 AshLink Marketplace. All rights reserved.</p>
       </div>
